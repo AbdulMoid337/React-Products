@@ -9,65 +9,45 @@ import axios from "./utils/axios";
 const Home = () => {
   const [products] = useContext(ProductContext);
   const { search } = useLocation();
-  const category =  decodeURIComponent(search.split("=")[1]) ;
+  const category = decodeURIComponent(search.split("=")[1]);
 
-  const [filteredProducts, setfilteredProducts] = useState(null);
+  const [filteredProducts, setFilteredProducts] = useState(null);
 
   const getProductsbycategory = async () => {
     try {
       const { data } = await axios.get(`/products/category/${category}`);
-      setfilteredProducts(data);
+      setFilteredProducts(data);
     } catch (error) {
-      console.error("Error fetching products by category:", error);    }
+      console.error("Error fetching products by category:", error);
+    }
   };
 
   useEffect(() => {
-    if (!filteredProducts || category == "undefined") setfilteredProducts(products);
-    
+    if (!filteredProducts || category === "undefined") setFilteredProducts(products);
+
     if (category && category !== "undefined") {
       getProductsbycategory();
     }
   }, [category, products]);
 
-//   const ProductProvider = ({ children }) => {
-//   const [products, setProducts] = useState([]);
-
-//   useEffect(() => {
-//     // Fetch products from the API and set them
-//     const fetchProducts = async () => {
-//       const { data } = await axios.get("/products");
-//       setProducts(data);
-//     };
-//     fetchProducts();
-//   }, []);
-
-//   return (
-//     <ProductContext.Provider value={[products, setProducts]}>
-//       {children}
-//     </ProductContext.Provider>
-//   );
-// };
-
-  
-
   return products ? (
     <>
       <Nav />
-      <div className="w-[85%] h-full p-5 flex flex-wrap gap-4 my-6 overflow-x-hidden overflow-y-auto">
+      <div className="w-full lg:w-[80%] p-5 flex flex-wrap gap-6 my-6 overflow-x-hidden overflow-y-auto bg-gray-900">
         {filteredProducts &&
           filteredProducts.map((elem, index) => (
             <Link
               key={elem.id}
               to={`/details/${elem.id}`}
-              className="hover:text-cyan-100 card p-5 rounded border-solid border-2 border-sky-500  shadow-md w-[18%] h-[45vh] flex-col flex justify-center items-center"
+              className="hover:text-cyan-100 card p-5 rounded border-solid border-2 border-blue-400 shadow-lg w-full sm:w-[48%] md:w-[31%] lg:w-[22%] h-[45vh] flex-col flex justify-center items-center transition-transform transform hover:scale-105 duration-300"
             >
               <div
-                className="hover:scale-95 transition duration-300 aspect-[1/3] ease-in-out w-full h-[80%]  bg-contain bg-no-repeat bg-center  mb-3"
+                className="aspect-[1/3] w-full h-[80%] bg-contain bg-no-repeat bg-center mb-3 hover:scale-95 transition-transform duration-300"
                 style={{
                   backgroundImage: `url(${elem.image})`,
                 }}
               ></div>
-              <h2 className="">{elem.title}</h2>
+              <h2 className="text-center text-white text-sm">{elem.title}</h2>
             </Link>
           ))}
       </div>
