@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { ProductContext } from "./utils/Context";
+import { nanoid } from "nanoid";
+import { useNavigate } from "react-router-dom";
 
 const AddProductForm = () => {
+  const navigate = useNavigate(); // Call useNavigate at the top level
+  const [products, setProducts] = useContext(ProductContext);
   const [formData, setFormData] = useState({
     image: "",
     title: "",
@@ -18,20 +23,55 @@ const AddProductForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate form data
+    if (
+      formData.title.trim().length < 5 ||
+      formData.image.trim().length < 5 ||
+      formData.category.trim().length < 5 ||
+      formData.price.trim().length < 1 ||
+      formData.description.trim().length < 5
+    ) {
+      alert("Please fill out all fields correctly.");
+      return; // Exit if validation fails
+    }
+
+    // Create a new product
+    const product = {
+      id: nanoid(),
+      ...formData, // Spread formData to include all properties
+    };
+
+    // Update products context
+    setProducts([...products, product]);
+
+    // Clear form data
+    setFormData({
+      image: "",
+      title: "",
+      category: "",
+      price: "",
+      description: "",
+    });
+    localStorage.setItem("products" , JSON.stringify([...products, product]))
+
+    // Navigate to the homepage (or any other route)
+    navigate("/");
+
     console.log("Form Submitted", formData);
-    // Handle form submission logic here
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto  h-[97%] p-8  mt-3 bg-gradient-to-r from-gray-800 via-gray-900 to-black shadow-2xl rounded-lg animate-fade-in-up">
+    <div className="w-full max-w-lg mx-auto h-[97%] p-8 mt-3 bg-gradient-to-r from-gray-800 via-gray-900 to-black shadow-2xl rounded-lg animate-fade-in-up">
       <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 mb-8 text-center">
         Add New Product
       </h2>
       <form onSubmit={handleSubmit} className="space-y-8">
-        
         {/* Image Link */}
         <div className="relative">
-          <label className="block text-sm font-bold text-gray-200 mb-2">Image Link</label>
+          <label className="block text-sm font-bold text-gray-200 mb-2">
+            Image Link
+          </label>
           <input
             type="text"
             name="image"
@@ -44,7 +84,9 @@ const AddProductForm = () => {
 
         {/* Title */}
         <div className="relative">
-          <label className="block text-sm font-bold text-gray-200 mb-2">Title</label>
+          <label className="block text-sm font-bold text-gray-200 mb-2">
+            Title
+          </label>
           <input
             type="text"
             name="title"
@@ -58,7 +100,9 @@ const AddProductForm = () => {
         {/* Category and Price */}
         <div className="flex gap-6">
           <div className="w-1/2">
-            <label className="block text-sm font-bold text-gray-200 mb-2">Category</label>
+            <label className="block text-sm font-bold text-gray-200 mb-2">
+              Category
+            </label>
             <input
               type="text"
               name="category"
@@ -70,7 +114,9 @@ const AddProductForm = () => {
           </div>
 
           <div className="w-1/2">
-            <label className="block text-sm font-bold text-gray-200 mb-2">Price</label>
+            <label className="block text-sm font-bold text-gray-200 mb-2">
+              Price
+            </label>
             <input
               type="text"
               name="price"
@@ -84,7 +130,9 @@ const AddProductForm = () => {
 
         {/* Description */}
         <div className="relative">
-          <label className="block text-sm font-bold text-gray-200 mb-2">Description</label>
+          <label className="block text-sm font-bold text-gray-200 mb-2">
+            Description
+          </label>
           <textarea
             name="description"
             value={formData.description}
