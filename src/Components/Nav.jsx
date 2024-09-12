@@ -8,7 +8,7 @@ const Nav = () => {
   let unique =
     products && products.reduce((acc, cv) => [...acc, cv.category], []);
   unique = [...new Set(unique)]; //Set unique things lata
-  console.log(unique);
+  // console.log(unique);
 
   //to genreate random colors
 

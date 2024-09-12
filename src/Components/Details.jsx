@@ -19,10 +19,11 @@ const Details = () => {
   useEffect(() => {
     getSingleProduct();
   }, []);
+  
   return products ? (
     <div className="w-[75%] flex h-full pl-0 m-auto p-[10%]">
       <img
-        className="object-contain h-[74%] w-[50% ]"
+        className="object-contain aspect-[2/3] h-[74%] w-[50% ]"
         src={`${products.image}`}
         alt=""
       />
