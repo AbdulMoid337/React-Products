@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import Nav from "./Nav";
 import { Link, useLocation } from "react-router-dom";
 import { ProductContext } from "./utils/Context";
+import { useContext } from "react";
+import Loader from "./Loader";
 import axios from "./utils/axios";
 
 const Home = () => {
@@ -9,8 +11,7 @@ const Home = () => {
   const { search } = useLocation();
   const category = decodeURIComponent(search.split("=")[1]);
 
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [filteredProducts, setFilteredProducts] = useState(null);
 
   const getProductsbycategory = async () => {
     try {
@@ -18,31 +19,24 @@ const Home = () => {
       setFilteredProducts(data);
     } catch (error) {
       console.error("Error fetching products by category:", error);
-      setFilteredProducts([]); // Ensure empty array in case of error
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!filteredProducts || category === "undefined") setFilteredProducts(products);
+
     if (category && category !== "undefined") {
-      getProductsbycategory();
-    } else {
-      setFilteredProducts(products || []); // Use context products if no category
-      setLoading(false); // Stop loading if no category
+      // getProductsbycategory();
+      setFilteredProducts(products.filter((p) => p.category == category))
     }
   }, [category, products]);
 
-  if (loading) {
-    return <div className="text-white text-center py-4">Loading...</div>; // Simple loading message
-  }
-
-  return (
+  return products ? (
     <>
       <Nav />
       <div className="w-full lg:w-[80%] p-5 flex flex-wrap gap-6 my-6 overflow-x-hidden overflow-y-auto bg-gray-900">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((elem) => (
+        {filteredProducts &&
+          filteredProducts.map((elem, index) => (
             <Link
               key={elem.id}
               to={`/details/${elem.id}`}
@@ -50,16 +44,17 @@ const Home = () => {
             >
               <div
                 className="aspect-[1/3] w-full h-[80%] bg-contain bg-no-repeat bg-center mb-3 hover:scale-95 transition-transform duration-300"
-                style={{ backgroundImage: `url(${elem.image})` }}
+                style={{
+                  backgroundImage: `url(${elem.image})`,
+                }}
               ></div>
               <h2 className="text-center text-white text-sm">{elem.title}</h2>
             </Link>
-          ))
-        ) : (
-          <div className="text-white text-center py-4">No products available</div> // Message for no products
-        )}
+          ))}
       </div>
     </>
+  ) : (
+    <Loader />
   );
 };
 

@@ -12,7 +12,7 @@ function App() {
   return (
     <div className=" h-screen  w-screen flex ">
       {(pathname != "/" || search.length > 0) && (
-        <Link to="/" className="text-2xl absolute left-[17%] text-red-400 ">
+        <Link to="/" className="text-1xl absolute left-[23%] text-red-400 ">
           Home
         </Link>
       )}
