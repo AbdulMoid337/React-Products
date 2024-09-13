@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { ProductContext } from "./utils/Context";
 import { nanoid } from "nanoid";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddProductForm = () => {
   const navigate = useNavigate(); // Call useNavigate at the top level
@@ -53,12 +54,10 @@ const AddProductForm = () => {
       price: "",
       description: "",
     });
-    localStorage.setItem("products" , JSON.stringify([...products, product]))
-
-    // Navigate to the homepage (or any other route)
+    localStorage.setItem("products", JSON.stringify([...products, product]));
     navigate("/");
-
-    console.log("Form Submitted", formData);
+    toast.success("Product Added successfully")
+    // Navigate to the homepage (or any other route)
   };
 
   return (

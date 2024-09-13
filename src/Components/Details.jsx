@@ -5,57 +5,56 @@ import Loader from "./Loader";
 import { ProductContext } from "./utils/Context";
 
 const Details = () => {
-  const [goods, setGoods] = useContext(ProductContext);
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { id } = useParams(); // useParams to get the id of the product
-  const navigate = useNavigate();
+  const [goods, setGoods] = useContext(ProductContext); // Access the product context
+  const [product, setProduct] = useState(null); // State to hold the selected product
+  const [loading, setLoading] = useState(true); // Loader state
+  const [error, setError] = useState(null); // Error handling state
+  const { id } = useParams(); // Get the product ID from the URL parameters
+  const navigate = useNavigate(); // For navigation after deletion
 
+  // Function to fetch a single product from an API
   const getSingleProduct = async () => {
     try {
       const { data } = await axios.get(`/products/${id}`);
-      setProduct(data);
-      setLoading(false);
+      setProduct(data); // Update product state
+      setLoading(false); // Stop the loader
     } catch (error) {
       console.error(error);
       setError("Failed to fetch product details.");
-      setLoading(false);
+      setLoading(false); // Stop the loader in case of error
     }
   };
 
+  // useEffect to run when component mounts or when 'goods' or 'id' changes
   useEffect(() => {
     if (goods && goods.length) {
-      const foundProduct = goods.find((p) => p.id === id);
+      // Check if products exist in the context
+      const foundProduct = goods.find((p) => String(p.id) === String(id)); // Match product id
       if (foundProduct) {
-        setProduct(foundProduct);
-        setLoading(false);
+        setProduct(foundProduct); // Set product if found in context
+        setLoading(false); // Stop loader
       } else {
-        getSingleProduct();
+        getSingleProduct(); // Fetch from API if not found
       }
     } else {
-      getSingleProduct();
+      getSingleProduct(); // Fetch from API if context is empty
     }
   }, [goods, id]);
 
+  // Function to delete the product
   const deleteHandler = (id) => {
-    // Filter out the deleted product
-    const filteredProducts = goods.filter((p) => p.id !== id);
-
-    // Update context and localStorage
-    setGoods(filteredProducts);
-    localStorage.setItem("products", JSON.stringify(filteredProducts));
-
-    // Redirect to the home page or product list
-    navigate("/");
+    const filteredProducts = goods.filter((p) => p.id !== id); // Filter out the deleted product
+    setGoods(filteredProducts); // Update the product context
+    localStorage.setItem("products", JSON.stringify(filteredProducts)); // Update local storage
+    navigate("/"); // Navigate back to the product list or home page
   };
 
   if (loading) {
-    return <Loader />;
+    return <Loader />; // Show loader while fetching data
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div>{error}</div>; // Show error if fetching fails
   }
 
   return product ? (
@@ -89,4 +88,3 @@ const Details = () => {
 };
 
 export default Details;
- 
