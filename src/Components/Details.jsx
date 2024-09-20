@@ -1,13 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ProductContext } from "./utils/Context";
 import Loader from "./Loader";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const Details = () => {
   const { id } = useParams();
-  const { products, addToCart, isInCart, cart } = useContext(ProductContext);
+  const { products, addToCart, isInCart, cart, deleteProduct } = useContext(ProductContext);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const foundProduct = products.find((p) => p.id === parseInt(id));
@@ -19,6 +22,22 @@ const Details = () => {
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      deleteProduct(product.id);
+      toast.success("Product deleted successfully!", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      navigate("/");
+    }
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -29,11 +48,21 @@ const Details = () => {
 
   return (
     <div className="min-h-screen bg-blue-50 p-4 lg:p-8">
-      <div className="mb-8 text-center">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8 text-center"
+      >
         <h1 className="text-4xl font-bold text-blue-800 mb-2">ShopWave</h1>
         <p className="text-gray-600">Detailed product information</p>
-      </div>
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+      </motion.div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6"
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-blue-700">{product.title}</h2>
           <div className="flex items-center space-x-4">
@@ -56,14 +85,26 @@ const Details = () => {
           </div>
         </div>
         <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/2 mb-4 md:mb-0">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="md:w-1/2 mb-4 md:mb-0"
+          >
             <img src={product.image} alt={product.title} className="w-full h-auto object-cover rounded-lg" />
-          </div>
-          <div className="md:w-1/2 md:pl-6">
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="md:w-1/2 md:pl-6"
+          >
             <p className="text-2xl font-bold text-gray-800 mb-4">${product.price.toFixed(2)}</p>
             <p className="text-gray-600 mb-4">{product.description}</p>
             <p className="text-sm text-gray-500 mb-4 capitalize">Category: {product.category}</p>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => addToCart(product)}
               className={`w-full py-2 px-4 rounded transition duration-300 ${
                 isInCart(product.id)
@@ -72,7 +113,7 @@ const Details = () => {
               } text-white font-bold`}
             >
               {isInCart(product.id) ? 'Added to Cart' : 'Add to Cart'}
-            </button>
+            </motion.button>
             <div className="mt-4 flex justify-between">
               <Link 
                 to={`/edit/${product.id}`} 
@@ -80,15 +121,18 @@ const Details = () => {
               >
                 Edit Product
               </Link>
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDelete}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
                 Delete Product
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

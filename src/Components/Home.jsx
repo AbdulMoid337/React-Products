@@ -1,21 +1,24 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
-import { gsap } from "gsap";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ProductContext } from "./utils/Context";
 import Loader from "./Loader";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Home = () => {
-  const { products, addToCart, isInCart, cart } = useContext(ProductContext);
+  const { products, addToCart, isInCart, getCartItemQuantity } = useContext(ProductContext);
   const [loading, setLoading] = useState(true);
-  const productRefs = useRef([]);
   const { search } = useLocation();
   const navigate = useNavigate();
   const category = search ? decodeURIComponent(search.split("=")[1]) : "";
 
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState('newest');
   const [searchTerm, setSearchTerm] = useState('');
   const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8;
+
+  const [animatingProduct, setAnimatingProduct] = useState(null);
 
   useEffect(() => {
     if (products.length > 0) {
@@ -39,11 +42,17 @@ const Home = () => {
       );
     }
 
-    result.sort((a, b) => {
-      return sortOrder === 'asc' ? a.price - b.price : b.price - a.price;
-    });
+    // Sort products based on sortOrder
+    if (sortOrder === 'asc') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortOrder === 'desc') {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortOrder === 'newest') {
+      result.sort((a, b) => b.id - a.id);
+    }
 
     setFilteredProducts(result);
+    setCurrentPage(1);
   }, [products, category, searchTerm, sortOrder]);
 
   const handleCategoryChange = (e) => {
@@ -51,18 +60,39 @@ const Home = () => {
     navigate(selectedCategory ? `/?category=${selectedCategory}` : '/');
   };
 
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const handleAddToCart = (product) => {
+    setAnimatingProduct(product);
+    setTimeout(() => {
+      addToCart(product);
+      setAnimatingProduct(null);
+    }, 1000);
+  };
+
+  const cartItemCount = products.reduce((total, item) => total + item.quantity, 0);
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) {
     return <Loader />;
   }
 
   return (
-    <div className="min-h-screen bg-blue-50 p-4 lg:p-8">
-      <div className="mb-8 text-center">
+    <div className="min-h-screen bg-blue-50 p-4 lg:p-8 relative">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8 text-center"
+      >
         <h1 className="text-4xl font-bold text-blue-800 mb-2">ShopWave</h1>
         <p className="text-gray-600">Ride the wave of modern shopping</p>
-      </div>
+      </motion.div>
       <div className="mb-6 space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold text-blue-700">Our Products</h2>
@@ -93,60 +123,101 @@ const Home = () => {
               </option>
             ))}
           </select>
-          <button 
-            onClick={() => setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc')}
-            className="bg-golden-500 hover:bg-golden-600 text-blue-900 font-bold py-2 px-4 rounded transition duration-300 transform hover:scale-105"
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Sort by Price ({sortOrder === 'asc' ? '↑' : '↓'})
-          </button>
-          <Link to="/cart" className="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                {cartItemCount}
-              </span>
-            )}
-          </Link>
+            <option value="newest">Newest</option>
+            <option value="asc">Price: Low to High</option>
+            <option value="desc">Price: High to Low</option>
+          </select>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredProducts.map((product, index) => (
-          <div 
-            key={product.id} 
-            ref={el => productRefs.current[index] = el}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105"
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+      >
+        {currentProducts.map((product) => (
+          <motion.div
+            key={product.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 flex flex-col"
           >
-            <Link to={`/details/${product.id}`}>
+            <Link to={`/details/${product.id}`} className="flex-grow">
               <div className="aspect-w-1 aspect-h-1">
                 <img 
                   src={product.image} 
                   alt={product.title} 
-                  className="object-cover w-full h-full"
+                  className="object-contain w-full h-full"
                 />
               </div>
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2 truncate">{product.title}</h2>
+              <div className="p-4 flex flex-col h-40">
+                <h2 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{product.title}</h2>
                 <p className="text-gray-600 mb-2">${product.price.toFixed(2)}</p>
-                <p className="text-sm text-gray-500 capitalize">{product.category}</p>
+                <p className="text-sm text-gray-500 capitalize mt-auto">{product.category}</p>
               </div>
             </Link>
-            <div className="p-4 pt-0">
+            <div className="p-4">
               <button
-                onClick={() => addToCart(product)}
+                onClick={() => handleAddToCart(product)}
                 className={`w-full py-2 px-4 rounded transition duration-300 ${
                   isInCart(product.id)
                     ? 'bg-green-500 hover:bg-green-600'
                     : 'bg-blue-500 hover:bg-blue-600'
                 } text-white`}
               >
-                {isInCart(product.id) ? 'Added in Cart' : 'Add to Cart'}
+                {isInCart(product.id) ? `Add More (${getCartItemQuantity(product.id)})` : 'Add to Cart'}
               </button>
             </div>
-          </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-8">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+          <button
+            key={number}
+            onClick={() => paginate(number)}
+            className={`mx-1 px-3 py-1 rounded ${
+              currentPage === number
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {number}
+          </button>
         ))}
       </div>
+
+      {/* Animating product */}
+      <AnimatePresence>
+        {animatingProduct && (
+          <motion.img
+            key="animating-product"
+            src={animatingProduct.image}
+            initial={{ opacity: 1, scale: 0.5, x: 0, y: 0 }}
+            animate={{ 
+              opacity: 0,
+              scale: 0.1,
+              x: window.innerWidth - 100,
+              y: -window.innerHeight + 100
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="fixed z-50 w-16 h-16 object-contain"
+            style={{ 
+              top: `${window.innerHeight / 2}px`, 
+              left: `${window.innerWidth / 2}px` 
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

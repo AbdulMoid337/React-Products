@@ -1,44 +1,30 @@
 import React, { createContext, useState, useEffect } from "react";
-import axios from "./axios";
 
 export const ProductContext = createContext();
 
-const Context = ({ children }) => {
+export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
-
-  const getProducts = async () => {
-    try {
-      const { data } = await axios.get("/products");
-      setProducts(data);
-      localStorage.setItem("products", JSON.stringify(data));
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
 
   useEffect(() => {
-    const storedProducts = localStorage.getItem("products");
-    if (storedProducts) {
-      setProducts(JSON.parse(storedProducts));
-    } else {
-      getProducts();
-    }
-
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    }
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('https://fakestoreapi.com/products');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const addToCart = (product) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
-        return prevCart.map(item => 
-          item.id === product.id 
+        return prevCart.map(item =>
+          item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -52,43 +38,46 @@ const Context = ({ children }) => {
     setCart(prevCart => prevCart.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId, quantity) => {
-    setCart(prevCart => {
-      const updatedCart = prevCart.map(item =>
-        item.id === productId ? { ...item, quantity: quantity } : item
-      );
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-  };
-
-  const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem("cart");
-  };
-
-  const addToWishlist = (product) => {
-    setWishlist(prevWishlist => {
-      if (!prevWishlist.some(item => item.id === product.id)) {
-        return [...prevWishlist, product];
-      }
-      return prevWishlist;
-    });
-  };
-
-  const removeFromWishlist = (productId) => {
-    setWishlist(prevWishlist => prevWishlist.filter(item => item.id !== productId));
-  };
-
-  const addToRecentlyViewed = (product) => {
-    setRecentlyViewed(prevViewed => {
-      const updatedViewed = [product, ...prevViewed.filter(p => p.id !== product.id)].slice(0, 5);
-      return updatedViewed;
-    });
+  const updateCartItemQuantity = (productId, newQuantity) => {
+    if (newQuantity === 0) {
+      removeFromCart(productId);
+    } else {
+      setCart(prevCart => prevCart.map(item =>
+        item.id === productId ? { ...item, quantity: newQuantity } : item
+      ));
+    }
   };
 
   const isInCart = (productId) => {
     return cart.some(item => item.id === productId);
+  };
+
+  const getCartItemQuantity = (productId) => {
+    const item = cart.find(item => item.id === productId);
+    return item ? item.quantity : 0;
+  };
+
+  const deleteProduct = (productId) => {
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== productId));
+    // Also remove the product from the cart if it's there
+    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+  };
+
+  const updateProduct = (updatedProduct) => {
+    setProducts(prevProducts =>
+      prevProducts.map(product =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      )
+    );
+
+    // Update the product in the cart if it exists
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.id === updatedProduct.id
+          ? { ...item, ...updatedProduct, quantity: item.quantity }
+          : item
+      )
+    );
   };
 
   return (
@@ -96,20 +85,18 @@ const Context = ({ children }) => {
       products,
       setProducts,
       cart,
+      setCart,
       addToCart,
       removeFromCart,
-      updateQuantity,
-      clearCart,
-      wishlist,
-      addToWishlist,
-      removeFromWishlist,
-      recentlyViewed,
-      addToRecentlyViewed,
-      isInCart
+      updateCartItemQuantity,
+      isInCart,
+      getCartItemQuantity,
+      deleteProduct,
+      updateProduct // Add this new function to the context
     }}>
       {children}
     </ProductContext.Provider>
   );
 };
 
-export default Context;
+export default ProductProvider;
