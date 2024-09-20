@@ -7,11 +7,15 @@ import Context from "./Components/utils/Context.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-createRoot(document.getElementById("root")).render(
-  <Context>
-    <BrowserRouter>
-      <App />
-      <ToastContainer autoClose={2000} />
-    </BrowserRouter>
-  </Context>
+const root = createRoot(document.getElementById("root"));
+
+root.render(
+  <StrictMode>
+    <Context>
+      <BrowserRouter>
+        <App />
+        <ToastContainer position="bottom-right" autoClose={5000} />
+      </BrowserRouter>
+    </Context>
+  </StrictMode>
 );

@@ -1,89 +1,109 @@
-import axios from "./utils/axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { gsap } from "gsap";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import Loader from "./Loader";
 import { ProductContext } from "./utils/Context";
+import { toast } from "react-toastify";
+import Nav from "./Nav";
+import Loader from "./Loader";
 
 const Details = () => {
-  const [goods, setGoods] = useContext(ProductContext); // Access the product context
-  const [product, setProduct] = useState(null); // State to hold the selected product
-  const [loading, setLoading] = useState(true); // Loader state
-  const [error, setError] = useState(null); // Error handling state
-  const { id } = useParams(); // Get the product ID from the URL parameters
-  const navigate = useNavigate(); // For navigation after deletion
+  const { products, addToCart, removeFromCart } = useContext(ProductContext);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const productRef = useRef(null);
 
-  // Function to fetch a single product from an API
-  const getSingleProduct = async () => {
-    try {
-      const { data } = await axios.get(`/products/${id}`);
-      setProduct(data); // Update product state
-      setLoading(false); // Stop the loader
-    } catch (error) {
-      console.error(error);
-      setError("Failed to fetch product details.");
-      setLoading(false); // Stop the loader in case of error
-    }
-  };
-
-  // useEffect to run when component mounts or when 'goods' or 'id' changes
   useEffect(() => {
-    if (goods && goods.length) {
-      // Check if products exist in the context
-      const foundProduct = goods.find((p) => String(p.id) === String(id)); // Match product id
+    const fetchProduct = async () => {
+      const foundProduct = products.find((p) => p.id === parseInt(id));
       if (foundProduct) {
-        setProduct(foundProduct); // Set product if found in context
-        setLoading(false); // Stop loader
+        setProduct(foundProduct);
+        setLoading(false);
       } else {
-        getSingleProduct(); // Fetch from API if not found
+        toast.error("Product not found");
+        navigate("/");
       }
-    } else {
-      getSingleProduct(); // Fetch from API if context is empty
-    }
-  }, [goods, id]);
+    };
 
-  // Function to delete the product
-  const deleteHandler = (id) => {
-    const filteredProducts = goods.filter((p) => p.id !== id); // Filter out the deleted product
-    setGoods(filteredProducts); // Update the product context
-    localStorage.setItem("products", JSON.stringify(filteredProducts)); // Update local storage
-    navigate("/"); // Navigate back to the product list or home page
+    fetchProduct();
+  }, [id, products, navigate]);
+
+  useEffect(() => {
+    if (product && !loading) {
+      gsap.from(productRef.current, {
+        duration: 0.5,
+        opacity: 0,
+        y: 50,
+        ease: "power3.out"
+      });
+    }
+  }, [product, loading]);
+
+  const handleDelete = () => {
+    removeFromCart(product.id);
+    toast.success("Product deleted successfully");
+    navigate("/");
   };
 
   if (loading) {
-    return <Loader />; // Show loader while fetching data
+    return <Loader />;
   }
 
-  if (error) {
-    return <div>{error}</div>; // Show error if fetching fails
+  if (!product) {
+    return <div>Product not found</div>;
   }
 
-  return product ? (
-    <div className="w-[75%] flex h-full pl-0 m-auto p-[10%]">
-      <img
-        className="object-contain aspect-[2/3] h-[74%] w-[50%]"
-        src={product.image}
-        alt={product.title || "Product image"}
-      />
-      <div className="content h-[60%] flex flex-col gap-4 pl-4 m-auto">
-        <h2 className="text-3xl">{product.title}</h2>
-        <p>{product.description}</p>
-        <p className="text-zinc-600">{product.category}</p>
-        <h2 className="text-green-400">{`$ ${product.price}`}</h2>
-        <div className="flex gap-3">
-          <Link to={`/edit/${product.id}`} className="p-2 border rounded">
-            Edit
-          </Link>
-          <button
-            onClick={() => deleteHandler(product.id)}
-            className="p-2 border rounded text-red-400"
-          >
-            Delete
-          </button>
+  return (
+    <div className="flex flex-col lg:flex-row min-h-screen bg-blue-50">
+      <Nav />
+      <main className="flex-1 p-4 lg:p-8 lg:ml-64">
+        <div ref={productRef} className="bg-white shadow-xl rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+          <div className="md:flex">
+            <div className="md:flex-shrink-0">
+              <img
+                className="h-48 w-full object-cover md:w-48"
+                src={product.image}
+                alt={product.title}
+              />
+            </div>
+            <div className="p-8">
+              <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
+                {product.category}
+              </div>
+              <h1 className="mt-2 text-2xl leading-8 font-semibold text-gray-900">
+                {product.title}
+              </h1>
+              <p className="mt-2 text-gray-600">{product.description}</p>
+              <p className="mt-4 text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</p>
+              <div className="mt-6 flex space-x-3">
+                <Link
+                  to={`/edit/${product.id}`}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => {
+                    addToCart(product);
+                    toast.success("Added to cart!");
+                  }}
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
-  ) : (
-    <div>Product not found</div>
   );
 };
 
