@@ -6,7 +6,7 @@ import { ProductContext } from "./utils/Context";
 import Loader from "./Loader";
 
 const Home = () => {
-  const { products, addToCart } = useContext(ProductContext);
+  const { products, addToCart, isInCart } = useContext(ProductContext);
   const [loading, setLoading] = useState(true);
   const productRefs = useRef([]);
   const { search } = useLocation();
@@ -103,9 +103,13 @@ const Home = () => {
               <div className="p-4 pt-0">
                 <button
                   onClick={() => addToCart(product)}
-                  className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
+                  className={`w-full py-2 px-4 rounded transition duration-300 ${
+                    isInCart(product.id)
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  } text-white`}
                 >
-                  Add to Cart
+                  {isInCart(product.id) ? 'Added in Cart' : 'Add to Cart'}
                 </button>
               </div>
             </div>

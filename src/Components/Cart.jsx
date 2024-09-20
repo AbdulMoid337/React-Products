@@ -50,95 +50,71 @@ const Cart = () => {
     }, 2000);
   };
 
+  const handleClearCart = () => {
+    clearCart();
+    toast.success("Cart cleared successfully");
+  };
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-blue-50">
       <Nav />
       <main className="flex-1 p-4 lg:p-8 lg:ml-64">
         <h2 className="text-3xl font-bold text-blue-800 mb-6">Your Cart</h2>
         {cart.length === 0 ? (
-          <p className="text-blue-600">Your cart is empty.</p>
+          <p className="text-gray-600">Your cart is empty.</p>
         ) : (
-          <div className="bg-white shadow-xl rounded-lg p-8 space-y-4 transform hover:scale-105 transition-transform duration-300">
-            {cart.map((item, index) => (
-              <div 
-                key={item.id} 
-                ref={el => cartItemRefs.current[index] = el}
-                className="flex items-center justify-between border-b py-4"
-              >
-                <div className="flex items-center">
-                  <img src={item.image} alt={item.title} className="w-16 h-16 object-cover mr-4" />
-                  <div>
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p>${item.price.toFixed(2)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <button
-                    onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                    className="px-2 py-1 bg-gray-200 rounded"
-                  >
-                    -
-                  </button>
-                  <span className="mx-2">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="px-2 py-1 bg-gray-200 rounded"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="ml-4 text-red-500"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-            <div className="mt-6">
-              <p className="text-xl font-bold text-blue-800">Total: ${total.toFixed(2)}</p>
-              {!isCheckingOut ? (
-                <button 
-                  onClick={handleCheckout}
-                  className="mt-4 bg-golden-500 text-blue-900 py-2 px-4 rounded hover:bg-golden-600 transition duration-300 transform hover:scale-105"
+          <>
+            <div className="bg-white shadow-xl rounded-lg p-6 mb-6">
+              {cart.map((item, index) => (
+                <div 
+                  key={item.id} 
+                  ref={el => cartItemRefs.current[index] = el}
+                  className="flex items-center justify-between border-b py-4"
                 >
-                  Proceed to Checkout
-                </button>
-              ) : (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">Select Payment Method:</h3>
-                  <div className="flex space-x-4 mb-4">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        value="credit"
-                        checked={paymentMethod === "credit"}
-                        onChange={() => setPaymentMethod("credit")}
-                        className="mr-2"
-                      />
-                      Credit Card
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        value="paypal"
-                        checked={paymentMethod === "paypal"}
-                        onChange={() => setPaymentMethod("paypal")}
-                        className="mr-2"
-                      />
-                      PayPal
-                    </label>
+                  <div className="flex items-center">
+                    <img src={item.image} alt={item.title} className="w-16 h-16 object-cover mr-4" />
+                    <div>
+                      <h3 className="font-semibold">{item.title}</h3>
+                      <p>${item.price.toFixed(2)}</p>
+                    </div>
                   </div>
-                  <button
-                    onClick={processPayment}
-                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-                  >
-                    Pay Now
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                      className="bg-gray-200 px-2 py-1 rounded-l"
+                    >
+                      -
+                    </button>
+                    <span className="bg-gray-100 px-4 py-1">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="bg-gray-200 px-2 py-1 rounded-r"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="ml-4 text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
-          </div>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold">Total: ${total.toFixed(2)}</h3>
+              <button
+                onClick={handleClearCart}
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+              >
+                Remove All
+              </button>
+            </div>
+            <button className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded transition duration-300">
+              Proceed to Checkout
+            </button>
+          </>
         )}
       </main>
     </div>

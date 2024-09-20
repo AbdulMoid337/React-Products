@@ -37,25 +37,19 @@ const Context = ({ children }) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
-        const updatedCart = prevCart.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        return prevCart.map(item => 
+          item.id === product.id 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        return updatedCart;
       } else {
-        const updatedCart = [...prevCart, { ...product, quantity: 1 }];
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        return updatedCart;
+        return [...prevCart, { ...product, quantity: 1 }];
       }
     });
   };
 
   const removeFromCart = (productId) => {
-    setCart(prevCart => {
-      const updatedCart = prevCart.filter(item => item.id !== productId);
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+    setCart(prevCart => prevCart.filter(item => item.id !== productId));
   };
 
   const updateQuantity = (productId, quantity) => {
@@ -93,20 +87,25 @@ const Context = ({ children }) => {
     });
   };
 
+  const isInCart = (productId) => {
+    return cart.some(item => item.id === productId);
+  };
+
   return (
     <ProductContext.Provider value={{ 
       products, 
       setProducts, 
       cart, 
       addToCart, 
-      removeFromCart, 
+      removeFromCart, // Make sure this is included
       updateQuantity,
       clearCart,
       wishlist,
       addToWishlist,
       removeFromWishlist,
       recentlyViewed,
-      addToRecentlyViewed
+      addToRecentlyViewed,
+      isInCart // Add this new function to the context
     }}>
       {children}
     </ProductContext.Provider>
