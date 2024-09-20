@@ -1,78 +1,58 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
-import { gsap } from "gsap";
+import React, { useState, useContext } from "react";
 import { ProductContext } from "./utils/Context";
-import { useNavigate } from "react-router-dom";
-import Nav from "./Nav";
-import Loader from "./Loader";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Create = () => {
-  console.log("Create component rendered");
-  const { products, setProducts } = useContext(ProductContext);
-  console.log("Products from context:", products);
+  const { addProduct } = useContext(ProductContext);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState({
+    title: "",
+    price: "",
+    description: "",
+    category: "",
+    image: "",
+  });
 
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState("");
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProduct((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    const newProduct = {
-      id: Date.now(),
-      title,
-      price: parseFloat(price),
-      description,
-      category,
-      image,
-    };
-
-    // Simulate an API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    setProducts([...products, newProduct]);
-    localStorage.setItem("products", JSON.stringify([...products, newProduct]));
-    setLoading(false);
+    addProduct(product);
+    toast.success("Product added successfully!");
     navigate("/");
   };
 
-  const formRef = useRef(null);
-
-  useEffect(() => {
-    gsap.from(formRef.current, {
-      duration: 0.5,
-      opacity: 0,
-      y: 50,
-      ease: "power3.out"
-    });
-  }, []);
-
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-blue-50">
-      <Nav />
-      <main className="flex-1 p-4 lg:p-8 lg:ml-64">
-        <h2 className="text-3xl font-bold text-blue-800 mb-6">Create New Product</h2>
-        <form 
-          ref={formRef}
-          onSubmit={handleSubmit} 
-          className="bg-white shadow-xl rounded-lg p-8 space-y-4 transform hover:scale-105 transition-transform duration-300"
-        >
+    <div className="min-h-screen bg-blue-50 p-4 lg:p-8">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-bold text-blue-800 mb-2">ShopWave</h1>
+        <p className="text-gray-600">Add a new product to our catalog</p>
+      </div>
+      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-blue-700">Create New Product</h2>
+          <Link 
+            to="/" 
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+          >
+            Back to Products
+          </Link>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
             <input
               type="text"
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              name="title"
+              value={product.title}
+              onChange={handleChange}
               required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
           </div>
           <div>
@@ -80,20 +60,22 @@ const Create = () => {
             <input
               type="number"
               id="price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              name="price"
+              value={product.price}
+              onChange={handleChange}
               required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
           </div>
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
             <textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              name="description"
+              value={product.description}
+              onChange={handleChange}
               required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             ></textarea>
           </div>
           <div>
@@ -101,10 +83,11 @@ const Create = () => {
             <input
               type="text"
               id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              name="category"
+              value={product.category}
+              onChange={handleChange}
               required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
           </div>
           <div>
@@ -112,20 +95,21 @@ const Create = () => {
             <input
               type="url"
               id="image"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              name="image"
+              value={product.image}
+              onChange={handleChange}
               required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-900 bg-golden-500 hover:bg-golden-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-golden-500 transition duration-300 transform hover:scale-105"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300"
           >
             Create Product
           </button>
         </form>
-      </main>
+      </div>
     </div>
   );
 };

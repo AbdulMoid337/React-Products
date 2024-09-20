@@ -1,67 +1,33 @@
-import React, { useContext, useState } from "react";
-import { ProductContext } from "./utils/Context";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Nav = () => {
-  const { cart, products } = useContext(ProductContext);
-  const { pathname, search } = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  let unique = products && products.reduce((acc, cv) => [...acc, cv.category], []);
-  unique = [...new Set(unique)];
-
-  const isActive = (category) => {
-    return search === `?category=${category}` ? 'bg-blue-600' : '';
-  };
 
   return (
     <>
       {/* Mobile Nav */}
       <div className="lg:hidden">
         <div className="flex items-center justify-between p-4 bg-blue-600 text-white">
-          <Link to="/" className="text-2xl font-bold text-golden-400">FakeStore</Link>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
+          <Link to="/" className="text-2xl font-bold text-golden-400">ShopWave</Link>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white focus:outline-none">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
             </svg>
           </button>
         </div>
         {isMenuOpen && (
           <div className="bg-blue-500 text-white p-4">
-            <Link
-              to="/create"
-              className="block w-full py-2 px-4 bg-green-500 hover:bg-green-600 rounded-md text-center transition duration-300"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Add New Product
-            </Link>
-            <h2 className="text-xl mb-3">Categories</h2>
-            <ul className="space-y-2">
-              {unique.map((category, index) => (
-                <li key={index}>
-                  <Link
-                    to={`/?category=${category}`}
-                    className={`block py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 ${isActive(category)}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {category}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/cart"
-              className="block py-2 px-4 text-white bg-blue-500 rounded mt-2"
-            >
-              Cart ({cart.length})
-            </Link>
+            <Link to="/" className="block py-2">Home</Link>
+            <Link to="/create" className="block py-2">Add New Product</Link>
+            {/* Remove the Cart link from here */}
           </div>
         )}
       </div>
 
       {/* Desktop Nav */}
       <nav className="hidden lg:block fixed left-0 top-0 w-64 h-full bg-blue-600 text-white p-6 space-y-6 overflow-y-auto">
-        <Link to="/" className="text-2xl font-bold text-golden-400">FakeStore</Link>
+        <Link to="/" className="text-2xl font-bold text-golden-400">ShopWave</Link>
         
         <Link
           to="/create"
@@ -70,37 +36,10 @@ const Nav = () => {
           Add New Product
         </Link>
 
-        <div>
-          <h2 className="text-xl mb-3">Categories</h2>
-          <ul className="space-y-2">
-            {unique.map((category, index) => (
-              <li key={index}>
-                <Link
-                  to={`/?category=${category}`}
-                  className={`block py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 ${isActive(category)}`}
-                >
-                  {category}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-2">
+          <Link to="/" className="block py-2 px-4 hover:bg-blue-700 rounded-md transition duration-300">Home</Link>
+          {/* Remove the Cart link from here */}
         </div>
-
-        <Link
-          to="/cart"
-          className="block w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-md text-center transition duration-300"
-        >
-          Cart ({cart.length})
-        </Link>
-
-        {pathname !== "/" && (
-          <Link
-            to="/"
-            className="block w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-md text-center transition duration-300"
-          >
-            Back to Home
-          </Link>
-        )}
       </nav>
     </>
   );

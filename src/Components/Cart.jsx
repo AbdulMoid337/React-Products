@@ -1,58 +1,27 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
+import React, { useContext, useState } from "react";
 import { ProductContext } from "./utils/Context";
 import Nav from "./Nav";
 import { toast } from "react-toastify";
-import Loader from "./Loader";
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useContext(ProductContext);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("credit");
-  const [loading, setLoading] = useState(true);
-  const cartItemRefs = useRef([]);
-
-  useEffect(() => {
-    // Simulate loading cart data
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, []);
-
-  useEffect(() => {
-    if (!loading && cart.length > 0) {
-      gsap.from(cartItemRefs.current, {
-        duration: 0.5,
-        opacity: 0,
-        y: 20,
-        stagger: 0.1,
-        ease: "power3.out"
-      });
-    }
-  }, [loading, cart]);
-
-  if (loading) {
-    return <Loader />;
-  }
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
-  };
-
-  const processPayment = () => {
-    // Simulate payment processing
-    setTimeout(() => {
-      toast.success(`Payment of $${total.toFixed(2)} processed successfully via ${paymentMethod}!`);
-      setIsCheckingOut(false);
-      clearCart();
-    }, 2000);
-  };
 
   const handleClearCart = () => {
     clearCart();
     toast.success("Cart cleared successfully");
+  };
+
+  const handleCheckout = () => {
+    setIsCheckingOut(true);
+    // Simulate a checkout process
+    setTimeout(() => {
+      clearCart();
+      setIsCheckingOut(false);
+      toast.success("Checkout successful! Thank you for your purchase.");
+    }, 2000); // Simulating a 2-second checkout process
   };
 
   return (
@@ -65,22 +34,18 @@ const Cart = () => {
         ) : (
           <>
             <div className="bg-white shadow-xl rounded-lg p-6 mb-6">
-              {cart.map((item, index) => (
-                <div 
-                  key={item.id} 
-                  ref={el => cartItemRefs.current[index] = el}
-                  className="flex items-center justify-between border-b py-4"
-                >
+              {cart.map((item) => (
+                <div key={item.id} className="flex items-center justify-between border-b py-4">
                   <div className="flex items-center">
                     <img src={item.image} alt={item.title} className="w-16 h-16 object-cover mr-4" />
                     <div>
                       <h3 className="font-semibold">{item.title}</h3>
-                      <p>${item.price.toFixed(2)}</p>
+                      <p className="text-gray-600">${item.price.toFixed(2)}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <button
-                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="bg-gray-200 px-2 py-1 rounded-l"
                     >
                       -
@@ -111,8 +76,14 @@ const Cart = () => {
                 Remove All
               </button>
             </div>
-            <button className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded transition duration-300">
-              Proceed to Checkout
+            <button 
+              onClick={handleCheckout}
+              disabled={isCheckingOut}
+              className={`w-full ${
+                isCheckingOut ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
+              } text-white font-bold py-3 px-4 rounded transition duration-300`}
+            >
+              {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
             </button>
           </>
         )}

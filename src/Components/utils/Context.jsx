@@ -92,12 +92,12 @@ const Context = ({ children }) => {
   };
 
   return (
-    <ProductContext.Provider value={{ 
-      products, 
-      setProducts, 
-      cart, 
-      addToCart, 
-      removeFromCart, // Make sure this is included
+    <ProductContext.Provider value={{
+      products,
+      setProducts,
+      cart,
+      addToCart,
+      removeFromCart,
       updateQuantity,
       clearCart,
       wishlist,
@@ -105,7 +105,7 @@ const Context = ({ children }) => {
       removeFromWishlist,
       recentlyViewed,
       addToRecentlyViewed,
-      isInCart // Add this new function to the context
+      isInCart
     }}>
       {children}
     </ProductContext.Provider>
