@@ -3,6 +3,16 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ProductContext } from "./utils/Context";
 import Loader from "./Loader";
 import { motion, AnimatePresence } from "framer-motion";
+// Add these imports
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "./Pagination"
 
 const Home = () => {
   const { products, addToCart, isInCart, getCartItemQuantity } = useContext(ProductContext);
@@ -76,7 +86,11 @@ const Home = () => {
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Update the paginate function
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo(0, 0);
+  };
 
   if (loading) {
     return <Loader />;
@@ -178,21 +192,34 @@ const Home = () => {
         ))}
       </motion.div>
 
-      {/* Pagination */}
+      {/* Replace the existing pagination with chadcn Pagination */}
       <div className="flex justify-center mt-8">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-          <button
-            key={number}
-            onClick={() => paginate(number)}
-            className={`mx-1 px-3 py-1 rounded ${
-              currentPage === number
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {number}
-          </button>
-        ))}
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => paginate(Math.max(1, currentPage - 1))}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <PaginationItem key={number}>
+                <PaginationLink
+                  onClick={() => paginate(number)}
+                  isActive={currentPage === number}
+                >
+                  {number}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
 
       {/* Animating product */}
