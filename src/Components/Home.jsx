@@ -22,8 +22,8 @@ const Home = () => {
   const category = search ? decodeURIComponent(search.split("=")[1]) : "";
 
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [sortOrder, setSortOrder] = useState('newest');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
@@ -33,7 +33,7 @@ const Home = () => {
   useEffect(() => {
     if (products.length > 0) {
       setLoading(false);
-      const uniqueCategories = [...new Set(products.map(p => p.category))];
+      const uniqueCategories = [...new Set(products.map((p) => p.category))];
       setCategories(uniqueCategories);
     }
   }, [products]);
@@ -104,7 +104,7 @@ const Home = () => {
         transition={{ duration: 0.5 }}
         className="mb-8 text-center"
       >
-        <h1 className="text-4xl font-bold text-blue-800 mb-2">ShopWave</h1>
+        <h1 className="text-4xl font-bold text-blue-800 mb-2 cursor-pointer">ShopWave</h1>
         <p className="text-gray-600">Ride the wave of modern shopping</p>
       </motion.div>
       <div className="mb-6 space-y-4">
@@ -131,8 +131,8 @@ const Home = () => {
             className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
+            {categories.map((cat , index) => (
+              <option key={index} value={cat}>
                 {cat}
               </option>
             ))}
@@ -160,19 +160,19 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 flex flex-col"
+            className="bg-white  rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 flex flex-col"
           >
             <Link to={`/details/${product.id}`} className="flex-grow">
               <div className="aspect-w-1 aspect-h-1">
                 <img 
                   src={product.image} 
                   alt={product.title} 
-                  className="object-contain w-full h-full"
+                  className="object-contain w-full h-40  cursor-pointer transition duration-300 transform hover:scale-105"
                 />
               </div>
-              <div className="p-4 flex flex-col h-40">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{product.title}</h2>
-                <p className="text-gray-600 mb-2">${product.price.toFixed(2)}</p>
+              <div className="p-4 flex flex-col h-40 ">
+                <h2 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 ">{product.title}</h2>
+                <p className="text-gray-600 mb-2 ">${product.price.toFixed(2)}</p>
                 <p className="text-sm text-gray-500 capitalize mt-auto">{product.category}</p>
               </div>
             </Link>
@@ -199,7 +199,7 @@ const Home = () => {
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => paginate(Math.max(1, currentPage - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                className={currentPage === 1 ? "pointer-events-none cursor-not-allowed opacity-50" : ""}
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
@@ -215,7 +215,7 @@ const Home = () => {
             <PaginationItem>
               <PaginationNext 
                 onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                className={currentPage === totalPages ? "pointer-events-none cursor-not-allowed opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>

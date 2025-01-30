@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "start": "react-scripts start",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node server/server.js",
+    "client": "npm run dev",
+    "dev:full": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -37,6 +40,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "eslint": "^9.9.0",
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",

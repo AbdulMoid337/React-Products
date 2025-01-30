@@ -8,6 +8,7 @@ import Create from './Components/Create';
 import Edit from './Components/Edit';
 import Details from './Components/Details';
 import Cart from './Components/Cart';
+import NotFound from './Components/NotFound';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="edit/:id" element={<Edit />} />
           <Route path="details/:id" element={<Details />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
       <ToastContainer
