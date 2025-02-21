@@ -19,7 +19,7 @@ const Nav = () => {
         {isMenuOpen && (
           <div className="bg-blue-500 text-white p-4">
             <Link to="/" className="block py-2">Home</Link>
-            <Link to="/create" className="block py-2">Add New Product</Link>
+            <Link to="/create" className="block py-2">Add Product</Link>
             {/* Remove the Cart link from here */}
           </div>
         )}
